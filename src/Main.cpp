@@ -45,10 +45,12 @@ private:
 	Player mPlayer;
 
 	const sf::Time TimePerFrame;
+	const uint32_t MaxUpdates;
 };
 
 Game::Game() :
-	TimePerFrame(sf::seconds(1.f / 60.f))
+	TimePerFrame(sf::seconds(1.f / 60.f)),
+	MaxUpdates(10)
 {
 #if defined(_DEBUG)
 	std::cout << "Hello World!" << std::endl;
@@ -72,8 +74,10 @@ Game::Game() :
 
 void Game::run()
 {
+	uint32_t numUpdates = 0;
 	sf::Clock clock;
 	sf::Time timeSinceLastUpdate = sf::Time::Zero;
+
 	while (mWindow.isOpen())
 	{
 		//
@@ -85,6 +89,15 @@ void Game::run()
 			timeSinceLastUpdate -= TimePerFrame;
 			processEvents();
 			update(TimePerFrame);
+
+			//
+			// To avoid spiral of death
+			//
+			numUpdates++;
+			if (numUpdates > MaxUpdates)
+			{
+				break;
+			}
 		}
 
 		render();
