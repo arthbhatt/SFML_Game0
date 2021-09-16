@@ -4,15 +4,24 @@ class Player
 {
 public:
 	Player() :
+		texture(),
+		sprite(),
 		isMovingUp(false),
 		isMovingDown(false),
 		isMovingLeft(false),
 		isMovingRight(false),
-		speed(5.f)
-	{}
+		speed(50.f)
+	{
+		if (texture.loadFromFile("content/Player.png"))
+		{
+			sprite.setTexture(texture);
+		}
+	}
 
 public:
-	sf::CircleShape shape;
+	sf::Texture texture;
+	sf::Sprite sprite;
+
 	bool isMovingUp;
 	bool isMovingDown;
 	bool isMovingLeft;
@@ -41,7 +50,6 @@ private:
 	sf::Texture mPlayerTexture;
 
 	sf::RenderWindow mWindow;
-	sf::Vector2u mWindowSize;
 	Player mPlayer;
 
 	const sf::Time TimePerFrame;
@@ -49,27 +57,14 @@ private:
 };
 
 Game::Game() :
+	mWindow(sf::VideoMode(640, 480), "SFML_Game0"),
 	TimePerFrame(sf::seconds(1.f / 60.f)),
 	MaxUpdates(10)
 {
-#if defined(_DEBUG)
-	std::cout << "Hello World!" << std::endl;
-#endif
-
-	// in Windows at least, this must be called before creating the window
-	float screenScalingFactor = platform.getScreenScalingFactor(mWindow.getSystemHandle());
-	// Use the screenScalingFactor
-	mWindow.create(sf::VideoMode(200.0f * screenScalingFactor, 200.0f * screenScalingFactor), "SFML works!");
-	platform.setIcon(mWindow.getSystemHandle());
-
-	mWindowSize = mWindow.getSize();
-
-	mPlayer.shape = sf::CircleShape(mWindowSize.x / 10);
-	mPlayer.shape.setFillColor(sf::Color::White);
-	mPlayer.shape.setPosition(mWindowSize.x / 10, mWindowSize.x / 10);
-
-	//mPlayerTexture.loadFromFile("content/sfml.png");
-	//mPlayer.shape.setTexture(&mPlayerTexture);
+	//
+	// Placing Player object in the world
+	//
+	mPlayer.sprite.setPosition(100.f, 100.f);
 }
 
 void Game::run()
@@ -126,7 +121,7 @@ void Game::update(sf::Time deltaTime)
 	}
 	movement *= deltaTime.asSeconds();
 
-	mPlayer.shape.move(movement);
+	mPlayer.sprite.move(movement);
 }
 
 void Game::processEvents()
@@ -188,7 +183,7 @@ void Game::handlePlayerInput(
 void Game::render()
 {
 	mWindow.clear();
-	mWindow.draw(mPlayer.shape);
+	mWindow.draw(mPlayer.sprite);
 	mWindow.display();
 }
 
