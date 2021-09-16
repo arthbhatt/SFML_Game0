@@ -7,7 +7,8 @@ public:
 		isMovingUp(false),
 		isMovingDown(false),
 		isMovingLeft(false),
-		isMovingRight(false)
+		isMovingRight(false),
+		speed(5.f)
 	{}
 
 public:
@@ -16,6 +17,8 @@ public:
 	bool isMovingDown;
 	bool isMovingLeft;
 	bool isMovingRight;
+
+	float speed;
 };
 
 class Game
@@ -26,7 +29,7 @@ public:
 
 private:
 	void processEvents();
-	void update();
+	void update(sf::Time);
 	void render();
 
 	void handlePlayerInput(
@@ -40,9 +43,12 @@ private:
 	sf::RenderWindow mWindow;
 	sf::Vector2u mWindowSize;
 	Player mPlayer;
+
+	const sf::Time TimePerFrame;
 };
 
-Game::Game()
+Game::Game() :
+	TimePerFrame(sf::seconds(1.f / 60.f))
 {
 #if defined(_DEBUG)
 	std::cout << "Hello World!" << std::endl;
@@ -66,34 +72,46 @@ Game::Game()
 
 void Game::run()
 {
+	sf::Clock clock;
+	sf::Time timeSinceLastUpdate = sf::Time::Zero;
 	while (mWindow.isOpen())
 	{
-		processEvents();
-		update();
+		//
+		// Taking Fixed Time Steps
+		//
+		timeSinceLastUpdate += clock.restart();
+		while (timeSinceLastUpdate > TimePerFrame)
+		{
+			timeSinceLastUpdate -= TimePerFrame;
+			processEvents();
+			update(TimePerFrame);
+		}
+
 		render();
 	}
 }
 
-void Game::update()
+void Game::update(sf::Time deltaTime)
 {
 	sf::Vector2f movement(0.f, 0.f);
 
 	if (mPlayer.isMovingUp)
 	{
-		movement.y -= 0.5f;
+		movement.y -= mPlayer.speed;
 	}
 	if (mPlayer.isMovingDown)
 	{
-		movement.y += 0.5f;
+		movement.y += mPlayer.speed;
 	}
 	if (mPlayer.isMovingLeft)
 	{
-		movement.x -= 0.5f;
+		movement.x -= mPlayer.speed;
 	}
 	if (mPlayer.isMovingRight)
 	{
-		movement.x += 0.5f;
+		movement.x += mPlayer.speed;
 	}
+	movement *= deltaTime.asSeconds();
 
 	mPlayer.shape.move(movement);
 }
