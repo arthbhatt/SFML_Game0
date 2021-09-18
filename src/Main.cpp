@@ -1,5 +1,12 @@
 #include "Platform/Platform.hpp"
 
+#define PLAYER_TEXTURE_FILE "content/images/Player.png"
+#define FONT_FILE "content/fonts/F25_Bank_Printer/F25_Bank_Printer.ttf"
+
+//
+// TODO: Add FPS counter to the game screen
+//
+
 class Player
 {
 public:
@@ -12,9 +19,13 @@ public:
 		isMovingRight(false),
 		speed(50.f)
 	{
-		if (texture.loadFromFile("content/Player.png"))
+		if (texture.loadFromFile(PLAYER_TEXTURE_FILE))
 		{
 			sprite.setTexture(texture);
+		}
+		else
+		{
+			std::cout << "Error loading player texture" << std::endl;
 		}
 	}
 
@@ -54,6 +65,9 @@ private:
 
 	const sf::Time TimePerFrame;
 	const uint32_t MaxUpdates;
+
+	sf::Text fps;
+	sf::Font font;
 };
 
 Game::Game() :
@@ -61,6 +75,18 @@ Game::Game() :
 	TimePerFrame(sf::seconds(1.f / 60.f)),
 	MaxUpdates(10)
 {
+	//
+	// Loading font to be used by onscreen text (to display fps)
+	//
+	font.loadFromFile(FONT_FILE);
+
+	//
+	// Configuring fps text
+	//
+	fps.setFont(font);
+	fps.setFillColor(sf::Color::Red);
+	fps.setCharacterSize(16);
+
 	//
 	// Placing Player object in the world
 	//
@@ -72,6 +98,8 @@ void Game::run()
 	uint32_t numUpdates = 0;
 	sf::Clock clock;
 	sf::Time timeSinceLastUpdate = sf::Time::Zero;
+	char cstr[30];
+	std::string string;
 
 	while (mWindow.isOpen())
 	{
@@ -79,6 +107,10 @@ void Game::run()
 		// Taking Fixed Time Steps
 		//
 		timeSinceLastUpdate += clock.restart();
+
+		snprintf(cstr, 30, "FPS: %f", 1.f / timeSinceLastUpdate.asSeconds());
+		fps.setString(cstr);
+
 		while (timeSinceLastUpdate > TimePerFrame)
 		{
 			timeSinceLastUpdate -= TimePerFrame;
@@ -86,7 +118,7 @@ void Game::run()
 			update(TimePerFrame);
 
 			//
-			// To avoid spiral of death
+			// Avoiding spiral of death
 			//
 			numUpdates++;
 			if (numUpdates > MaxUpdates)
@@ -183,6 +215,7 @@ void Game::handlePlayerInput(
 void Game::render()
 {
 	mWindow.clear();
+	mWindow.draw(fps);
 	mWindow.draw(mPlayer.sprite);
 	mWindow.display();
 }
