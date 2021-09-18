@@ -3,10 +3,6 @@
 #define PLAYER_TEXTURE_FILE "content/images/Player.png"
 #define FONT_FILE "content/fonts/F25_Bank_Printer/F25_Bank_Printer.ttf"
 
-//
-// TODO: Add FPS counter to the game screen
-//
-
 class Player
 {
 public:
@@ -56,6 +52,13 @@ private:
 		sf::Keyboard::Key,
 		bool);
 
+	void showFps(sf::Time time)
+	{
+		char cstr[15];
+		snprintf(cstr, 15, "FPS: %f", 1.f / time.asSeconds());
+		fps.setString(cstr);
+	}
+
 private:
 	util::Platform platform;
 	sf::Texture mPlayerTexture;
@@ -98,8 +101,6 @@ void Game::run()
 	uint32_t numUpdates = 0;
 	sf::Clock clock;
 	sf::Time timeSinceLastUpdate = sf::Time::Zero;
-	char cstr[30];
-	std::string string;
 
 	while (mWindow.isOpen())
 	{
@@ -108,8 +109,7 @@ void Game::run()
 		//
 		timeSinceLastUpdate += clock.restart();
 
-		snprintf(cstr, 30, "FPS: %f", 1.f / timeSinceLastUpdate.asSeconds());
-		fps.setString(cstr);
+		showFps(timeSinceLastUpdate);
 
 		while (timeSinceLastUpdate > TimePerFrame)
 		{
